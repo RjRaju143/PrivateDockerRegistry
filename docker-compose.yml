@@ -1,0 +1,24 @@
+version: "3"
+services:
+  registry:
+    image: registry:2
+    environment:
+      - REGISTRY_HTTP_ADDR=0.0.0.0:5000
+      - REGISTRY_AUTH=htpasswd
+      - REGISTRY_AUTH_HTPASSWD_REALM=Registry
+      - REGISTRY_AUTH_HTPASSWD_PATH=/var/lib/registry/registry.password
+      - REGISTRY_STORAGE_FILESYSTEM_ROOTDIRECTORY=/data
+    ports:
+      - 5000:5000
+    volumes:
+      - ./docker-registry-data/auth:/var/lib/registry
+      - ./docker-registry-data:/data
+      - ./docker-registry-data/config/config.yml:/etc/docker/registry/config.yml
+  nginx:
+    image: nginx:alpine
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+    ports:
+      - 80:80
+    depends_on:
+      - registry

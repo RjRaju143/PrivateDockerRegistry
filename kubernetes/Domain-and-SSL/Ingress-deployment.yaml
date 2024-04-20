@@ -1,0 +1,34 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: docker-register
+  namespace: docker-registry
+  annotations:
+    ## For Docker registry
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/proxy-body-size: "0"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "900"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "900"
+    ## SSL
+    cert-manager.io/cluster-issuer: "letsencrypt"
+    # ## sticky sessions
+    # nginx.ingress.kubernetes.io/affinity: "cookie"
+    # nginx.ingress.kubernetes.io/session-cookie-name: "route"
+    # nginx.ingress.kubernetes.io/session-cookie-expires: "172800"
+    # nginx.ingress.kubernetes.io/session-cookie-max-age: "172800"
+spec:
+  tls:
+    - hosts:
+      - registry.example.domain.com
+      secretName: letsencrypt-secret
+  rules:
+  - host: registry.example.domain.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: docker-registry-service
+            port:
+              number: 5000

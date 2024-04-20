@@ -1,0 +1,15 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: docker-registry-service
+spec:
+  selector:
+    app: docker-registry
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 5000
+      # nodePort: 30009
+  type: ClusterIP
+  # type: NodePort
+  # type: LoadBalancer
