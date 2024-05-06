@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  registry-ui:
+    container_name: registry-ui
+    image: joxit/docker-registry-ui:main
+    ports:
+      - 80:80
+    environment:
+      - SINGLE_REGISTRY=true
+      - REGISTRY_TITLE=Docker Registry UI
+      - DELETE_IMAGES=true
+      - SHOW_CONTENT_DIGEST=true
+      - NGINX_PROXY_PASS_URL=http://registry-server:5000
+      - SHOW_CATALOG_NB_TAGS=true
+      - CATALOG_MIN_BRANCHES=1
+      - CATALOG_MAX_BRANCHES=1
+      - TAGLIST_PAGE_SIZE=100
+      - REGISTRY_SECURED=true  # Enable authentication (adjust accordingly)
+      # ... other environment variables
+    volumes:
+      - ./registry/data:/var/lib/registry
+      - ./registry.password:/data/auth/registry.password
+
+  registry-server:
+    container_name: registry-server
+    image: registry:2.8.2
+    environment:
+      REGISTRY_HTTP_HEADERS_Access-Control-Origin: '[http://your.domain.com]'  # Restrict allowed origins
+      REGISTRY_HTTP_HEADERS_Access-Control-Allow-Methods: '[HEAD,GET,OPTIONS,DELETE]'
+      REGISTRY_HTTP_HEADERS_Access-Control-Credentials: '[true]'
+      REGISTRY_HTTP_HEADERS_Access-Control-Allow-Headers: '[Authorization,Accept,Cache-Control]'
+      REGISTRY_HTTP_HEADERS_Access-Control-Expose-Headers: '[Docker-Content-Digest]'
+      REGISTRY_STORAGE_DELETE_ENABLED: 'true'
+
+      REGISTRY_AUTH_HTPASSWD_PATH: '/data/auth/registry.password'
+      REGISTRY_AUTH_HTPASSWD_REALM: "My Docker Registry"  # Set the realm name
+      # ... other environment variables
+      REGISTRY_AUTH: htpasswd  # Enable htpasswd authentication
+    volumes:
+      - ./registry/data:/var/lib/registry
+      - ./registry.password:/data/auth/registry.password
+
+
